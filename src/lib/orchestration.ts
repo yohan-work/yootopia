@@ -3,7 +3,7 @@
 // 역할 기반 발언 의향 점수 계산 + 응답 생성
 // TODO: Replace generateAgentResponse() with real LLM API
 // ============================================================
-import { Agent, TranscriptMessage, SpeakIntentScore } from '@/types';
+import { Agent, TranscriptMessage, SpeakIntentScore, Meeting } from '@/types';
 
 // ---- Role-based keyword triggers ----
 const ROLE_KEYWORDS: Record<string, string[]> = {
@@ -74,7 +74,17 @@ const RESPONSE_TEMPLATES: Record<string, string[]> = {
 };
 
 // ---- Generate agent response (Ollama) ----
-export async function generateAgentResponse(agent: Agent, userText: string): Promise<string> {
+export async function generateAgentResponse(
+    agent: Agent,
+    meeting: Meeting,
+    transcripts: TranscriptMessage[],
+    promptHint: string
+): Promise<string> {
+    // 최근 10개의 대화 내역 포맷팅
+    const recentTranscripts = transcripts.slice(-10).map(t => {
+        return `[${t.speakerName}] ${t.text}`;
+    }).join('\n');
+
     const prompt = `
 당신은 현재 회사 회의에 참석 중입니다.
 당신의 역할: ${agent.title} (${agent.role})
@@ -85,10 +95,18 @@ export async function generateAgentResponse(agent: Agent, userText: string): Pro
 
 상황 및 시스템 프롬프트: ${agent.systemPrompt || '당신의 역할에 맞게 아주 자연스러운 한국어로 대화에 참여하세요.'}
 
-회의 중 누군가가 다음과 같이 발언했습니다: "${userText}"
+---
+[현재 회의 정보]
+회의 제목: ${meeting.title}
+회의 맥락: ${meeting.description || '없음'}
 
-이 발언을 듣고 당신의 역할과 성격에 맞게 대답하세요.
-절대 다른 언어를 쓰지 말고 오직 '자연스러운 한국어'로만 문서나 대본의 형식이 아닌, 육성으로 말하는 것처럼 자연스럽게 1~3문장으로 짧게 대답하세요.
+[최근 대화 내역]
+${recentTranscripts}
+---
+
+방금 당신이 "지목"을 받거나 발언할 차례가 되었습니다. (참고: "${promptHint}")
+위의 회의 정보와 최근 대화 내역의 맥락을 완벽히 이해하고, 당신의 전문 분야와 역할에 입각하여 자연스럽게 이어서 발언해 주세요.
+절대 다른 언어를 쓰지 말고 오직 '자연스러운 한국어'로만 구어체(대본 형식이 아닌 실제 육성 말씨)로 2~4문장으로 짧고 명확하게 대답하세요.
 `;
 
     try {
@@ -96,7 +114,7 @@ export async function generateAgentResponse(agent: Agent, userText: string): Pro
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'qwen3-coder-next:latest',
+                model: 'gemma3:latest',
                 prompt: prompt,
                 stream: false,
             }),
