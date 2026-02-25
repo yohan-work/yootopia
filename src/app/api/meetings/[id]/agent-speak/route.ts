@@ -19,7 +19,10 @@ export async function POST(req: NextRequest, { params }: Params) {
         lastSpokenAt: new Date().toISOString(),
     });
 
-    const responseText = await generateAgentResponse(agent, promptHint ?? '지목 발언 요청');
+    // Get recent transcripts
+    const transcripts = transcriptRepo.findByMeeting(id);
+
+    const responseText = await generateAgentResponse(agent, meeting, transcripts, promptHint ?? '지목 발언 요청');
     const agentMsg = transcriptRepo.add({
         meetingId: id,
         speakerType: 'agent',
