@@ -61,7 +61,7 @@ export function AppSidebar() {
         <aside className="sidebar">
             {/* Logo */}
             <div className="sidebar-logo">
-                <h1>⚡ Yootopia</h1>
+                <h1>Yootopia</h1>
                 <p>AI Agent Meeting System</p>
             </div>
 

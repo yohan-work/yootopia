@@ -16,10 +16,10 @@ export default function DashboardPage() {
           }}
         >
           {[
-            { label: '활성 에이전트', value: '4', color: '#10b981', emoji: '👥' },
-            { label: '예정된 회의', value: '0', color: '#3b82f6', emoji: '📅' },
-            { label: '진행 중인 회의', value: '0', color: '#ef4444', emoji: '🔴' },
-            { label: '총 회의 수', value: '0', color: '#8b5cf6', emoji: '📊' },
+            { label: '활성 에이전트', value: '4', color: '#fff', emoji: '' },
+            { label: '예정된 회의', value: '0', color: '#fff', emoji: '' },
+            { label: '진행 중인 회의', value: '0', color: '#fff', emoji: '' },
+            { label: '총 회의 수', value: '0', color: '#fff', emoji: '' },
           ].map((stat) => (
             <div key={stat.label} className="glass-card" style={{ padding: '20px' }}>
               <div style={{ fontSize: '24px', marginBottom: '8px' }}>{stat.emoji}</div>
@@ -34,7 +34,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="glass-card" style={{ padding: '32px', textAlign: 'center' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🤖</div>
+          {/* <div style={{ fontSize: '48px', marginBottom: '16px' }}>🤖</div> */}
           <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>
             Yootopia에 오신 것을 환영합니다
           </h3>

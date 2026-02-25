@@ -60,7 +60,7 @@ export default function MeetingsPage() {
             <div className="page-header">
                 <div>
                     <h2 className="page-header-title">
-                        <span className="page-header-emoji">📅</span>사내 캘린더
+                        사내 캘린더
                     </h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '4px' }}>
                         회의 일정을 관리하고 AI 에이전트를 초대하세요

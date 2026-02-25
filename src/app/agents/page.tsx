@@ -68,7 +68,7 @@ export default function AgentsPage() {
             <div className="page-header">
                 <div>
                     <h2 className="page-header-title">
-                        <span className="page-header-emoji">👥</span>직원 관리
+                        직원 관리
                     </h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '4px' }}>
                         고용된 직원의 프로필과 설정을 관리합니다

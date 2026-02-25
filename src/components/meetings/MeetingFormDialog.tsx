@@ -77,7 +77,7 @@ export function MeetingFormDialog({ open, agents, onClose, onSave }: MeetingForm
             >
                 <DialogHeader>
                     <DialogTitle style={{ color: 'var(--text-primary)', fontSize: '16px' }}>
-                        📅 일정 추가
+                        일정 추가
                     </DialogTitle>
                 </DialogHeader>
 

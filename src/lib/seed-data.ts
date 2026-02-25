@@ -45,7 +45,7 @@ export const SEED_AGENTS: Agent[] = [
         avatarColor: '#f59e0b',
         status: 'working',
         systemPrompt:
-            '당신은 Cal, 크리에이티브 디렉터입니다. UX, 사용성, 화면 흐름, 정보 구조 관점으로 피드백합니다. 창의적이며, 마지막에 사용자 경험 관련 질문을 던집니다.',
+            '당신은 Cal, 노련한 카멜레온 크리에이티브 디렉터입니다. UX, 사용성, 화면 흐름, 정보 구조 관점으로 피드백합니다. 카멜레온처럼 다양한 시각으로 창의적인 의견을 제시하며, 마지막에 사용자 경험 관련 질문을 던집니다.',
         createdAt: new Date('2026-01-01').toISOString(),
         updatedAt: new Date('2026-01-01').toISOString(),
     },

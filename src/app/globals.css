@@ -4,28 +4,28 @@
 
 /* ============================================================
    Yootopia - Global Design System
-   Dark mode with purple/blue gradient aesthetic
+   Modern Flat Dark Theme
    ============================================================ */
 
 :root {
   /* Background */
-  --bg-base: #0a0a14;
-  --bg-gradient-1: #0f0824;
-  --bg-gradient-2: #0d1340;
-  --bg-gradient-3: #0a0a14;
+  --bg-base: #000000;
+  --bg-gradient-1: #000000;
+  --bg-gradient-2: #050505;
+  --bg-gradient-3: #0a0a0a;
 
   /* Surface (cards, sidebar) */
-  --surface-1: rgba(255, 255, 255, 0.04);
-  --surface-2: rgba(255, 255, 255, 0.07);
-  --surface-3: rgba(255, 255, 255, 0.10);
-  --surface-border: rgba(255, 255, 255, 0.08);
+  --surface-1: #111111;
+  --surface-2: #1a1a1a;
+  --surface-3: #262626;
+  --surface-border: #333333;
 
-  /* Accent */
-  --accent-purple: #7c3aed;
-  --accent-purple-light: #a78bfa;
+  /* Accent (Single Point Color: Blue) */
+  --accent-purple: #3b82f6;
+  --accent-purple-light: #60a5fa;
   --accent-blue: #3b82f6;
-  --accent-blue-light: #93c5fd;
-  --accent-glow: rgba(124, 58, 237, 0.3);
+  --accent-blue-light: #60a5fa;
+  --accent-glow: rgba(59, 130, 246, 0.3);
 
   /* Status colors */
   --status-working: #10b981;
@@ -43,7 +43,7 @@
 
   /* Sidebar */
   --sidebar-width: 220px;
-  --sidebar-bg: rgba(10, 8, 24, 0.85);
+  --sidebar-bg: #0a0a0a;
 
   /* Radius */
   --radius-sm: 8px;
@@ -71,16 +71,12 @@ body {
   overflow-x: hidden;
 }
 
-/* ---- Gradient Background ---- */
+/* ---- Flat Background ---- */
 .app-bg {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(139, 92, 246, 0.25) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(59, 130, 246, 0.20) 0%, transparent 60%),
-    radial-gradient(ellipse 70% 80% at 50% 50%, rgba(15, 8, 36, 0.95) 0%, transparent 100%),
-    linear-gradient(135deg, #0f0824 0%, #0d1340 40%, #0a0a14 80%, #0f0824 100%);
+  background-color: var(--bg-base);
 }
 
 /* ---- Sidebar ---- */
@@ -92,8 +88,6 @@ body {
   width: var(--sidebar-width);
   background: var(--sidebar-bg);
   border-right: 1px solid var(--surface-border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -108,10 +102,7 @@ body {
   font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  background: linear-gradient(135deg, var(--accent-purple-light), var(--accent-blue-light));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #ffffff;
 }
 
 .sidebar-logo p {
@@ -159,9 +150,9 @@ body {
 }
 
 .sidebar-item.active {
-  background: rgba(124, 58, 237, 0.18);
-  color: var(--accent-purple-light);
-  border-color: rgba(124, 58, 237, 0.3);
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent-blue);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .sidebar-item .icon {
@@ -219,8 +210,6 @@ body {
   background: var(--surface-1);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   transition: all 0.2s ease;
 }
 
