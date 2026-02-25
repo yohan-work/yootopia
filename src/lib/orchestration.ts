@@ -73,10 +73,44 @@ const RESPONSE_TEMPLATES: Record<string, string[]> = {
     ],
 };
 
-// ---- Generate agent response (mock) ----
-// TODO: Replace with actual LLM API call (e.g., OpenAI, Anthropic)
-export function generateAgentResponse(agent: Agent, userText: string): string {
-    const templates = RESPONSE_TEMPLATES[agent.role] ?? RESPONSE_TEMPLATES.custom;
-    const idx = Math.floor(Math.random() * templates.length);
-    return `[${agent.name}] ${templates[idx]}`;
+// ---- Generate agent response (Ollama) ----
+export async function generateAgentResponse(agent: Agent, userText: string): Promise<string> {
+    const prompt = `
+당신은 현재 회사 회의에 참석 중입니다.
+당신의 역할: ${agent.title} (${agent.role})
+당신의 이름: ${agent.name}
+당신의 전문 분야: ${agent.specialty}
+당신의 말투: ${agent.personalityTone}
+당신의 응답 스타일: ${agent.responseStyle}
+
+상황 및 시스템 프롬프트: ${agent.systemPrompt || '당신의 역할에 맞게 아주 자연스러운 한국어로 대화에 참여하세요.'}
+
+회의 중 누군가가 다음과 같이 발언했습니다: "${userText}"
+
+이 발언을 듣고 당신의 역할과 성격에 맞게 대답하세요.
+절대 다른 언어를 쓰지 말고 오직 '자연스러운 한국어'로만 문서나 대본의 형식이 아닌, 육성으로 말하는 것처럼 자연스럽게 1~3문장으로 짧게 대답하세요.
+`;
+
+    try {
+        const response = await fetch('http://localhost:11434/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'qwen3-coder-next:latest',
+                prompt: prompt,
+                stream: false,
+            }),
+        });
+
+        if (!response.ok) {
+            console.error('Ollama API error:', response.statusText);
+            return `[${agent.name}] (시스템 오류: 연결할 수 없습니다.)`;
+        }
+
+        const data = await response.json();
+        return `[${agent.name}] ${data.response.trim()}`;
+    } catch (err) {
+        console.error('Failed to call Ollama:', err);
+        return `[${agent.name}] (시스템 오류: Ollama 응답 실패)`;
+    }
 }

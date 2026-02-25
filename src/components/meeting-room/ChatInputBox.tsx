@@ -3,7 +3,7 @@
 import { useState, useRef, KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send } from 'lucide-react';
+import { Send, Mic } from 'lucide-react';
 
 interface ChatInputBoxProps {
     onSend: (text: string) => Promise<void>;
@@ -15,6 +15,9 @@ export function ChatInputBox({ onSend, disabled, placeholder }: ChatInputBoxProp
     const [text, setText] = useState('');
     const [sending, setSending] = useState(false);
     const ref = useRef<HTMLTextAreaElement>(null);
+
+    const [isListening, setIsListening] = useState(false);
+    const recognitionRef = useRef<any>(null);
 
     const handleSend = async () => {
         if (!text.trim() || sending || disabled) return;
@@ -33,6 +36,40 @@ export function ChatInputBox({ onSend, disabled, placeholder }: ChatInputBoxProp
             e.preventDefault();
             handleSend();
         }
+    };
+
+    const toggleListen = () => {
+        if (isListening) {
+            recognitionRef.current?.stop();
+            setIsListening(false);
+            return;
+        }
+
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert('이 브라우저에서는 음성 인식을 지원하지 않습니다.');
+            return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'ko-KR';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = () => setIsListening(true);
+        recognition.onend = () => setIsListening(false);
+        recognition.onerror = (e: any) => {
+            console.error('Speech recognition error', e);
+            setIsListening(false);
+        };
+
+        recognition.onresult = (e: any) => {
+            const transcript = e.results[0][0].transcript;
+            setText((prev) => prev + (prev.endsWith(' ') || prev.length === 0 ? '' : ' ') + transcript);
+        };
+
+        recognitionRef.current = recognition;
+        recognition.start();
     };
 
     return (
@@ -67,6 +104,23 @@ export function ChatInputBox({ onSend, disabled, placeholder }: ChatInputBoxProp
                     overflowY: 'auto',
                 }}
             />
+            <Button
+                onClick={toggleListen}
+                disabled={disabled || sending}
+                style={{
+                    background: isListening ? '#ef4444' : 'var(--surface-button)',
+                    color: isListening ? 'white' : 'var(--text-primary)',
+                    width: 40,
+                    height: 40,
+                    padding: 0,
+                    flexShrink: 0,
+                    borderRadius: '10px',
+                    border: '1px solid var(--surface-border)',
+                }}
+                title="음성 입력"
+            >
+                <Mic size={15} />
+            </Button>
             <Button
                 onClick={handleSend}
                 disabled={!text.trim() || disabled || sending}

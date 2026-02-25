@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { Agent, AgentRuntimeState, AgentUiState } from '@/types';
 import { AGENT_UI_STATE_LABELS, AGENT_ROLE_LABELS } from '@/constants/ui-text';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Hand, Lightbulb } from 'lucide-react';
+import { Mic, MicOff, Hand, Lightbulb, Cat, Bird, Bug, User, PawPrint } from 'lucide-react';
 import Image from 'next/image';
+import { LucideIcon } from 'lucide-react';
 
 interface AgentSeatCardProps {
     agent: Agent;
@@ -23,37 +24,43 @@ const STATE_COLORS: Record<AgentUiState, string> = {
 
 // Generates a robust, consistent image URL using pollinations.ai
 const getAvatarImageUrl = (role: string, name: string) => {
-    // We add a distinct seed using the name to ensure the same agent always gets the exact same image
     const seed = name.length * 1024 + name.charCodeAt(0);
-    const basePrompt = "zootopia style anthropomorphic 3d animation character, pixar disney style, hyper realistic, cinematic lighting, modern office background";
+    const lowerRole = role.toLowerCase();
 
-    let specificPrompt = "";
-    switch (role) {
-        case 'lawyer':
-            specificPrompt = "a serious calm cat wearing a sharp lawyer suit and tie";
-            break;
-        case 'accountant':
-            specificPrompt = "a smart pig wearing a formal business suit and glasses";
-            break;
-        case 'designer':
-            specificPrompt = "a trendy cool duck wearing stylish designer clothes and a scarf";
-            break;
-        case 'announcer':
-            specificPrompt = "an elegant fox wearing a formal news anchor suit";
-            break;
-        default:
-            specificPrompt = "a professional animal wearing business casual clothes";
-            break;
+    if (name === 'Qui' || lowerRole === 'lawyer') {
+        return '/avatars/qui.png';
+    } else if (name === 'Done' || lowerRole === 'accountant') {
+        return 'https://image.pollinations.ai/prompt/a%20smart%20pink%20pig%20accountant%20wearing%20glasses,%20Zootopia%20Pixar%203D%20style,%20high%20quality?width=600&height=400&nologo=true';
+    } else if (name === 'Cal' || lowerRole === 'designer') {
+        return 'https://image.pollinations.ai/prompt/a%20vibrant%20green%20chameleon%20designer,%20Zootopia%20Pixar%203D%20style,%20high%20quality?width=600&height=400&nologo=true';
+    } else if (name === 'Sian' || lowerRole === 'announcer') {
+        return 'https://image.pollinations.ai/prompt/a%20professional%20orange%20fox%20news%20anchor,%20Zootopia%20Pixar%203D%20style,%20high%20quality?width=600&height=400&nologo=true';
     }
 
+    const basePrompt = "Zootopia Pixar 3D animation style, anthropomorphic character, professional video call frame, high quality";
+    const specificPrompt = "professional animal in a business suit";
     const fullPrompt = `${specificPrompt}, ${basePrompt}`;
-    return `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=400&height=400&seed=${seed}&nologo=true`;
+    // Using manual replacement for spaces to keep commas as is, matching the background image URL style
+    const encodedPrompt = fullPrompt.replace(/ /g, '%20');
+    return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=600&height=400&seed=${seed}&nologo=true`;
+};
+
+const getRoleIcon = (role: string, name: string): LucideIcon => {
+    const lowerRole = role.toLowerCase();
+    if (name === 'Qui' || lowerRole === 'lawyer') return Cat;
+    if (name === 'Done' || lowerRole === 'accountant') return PawPrint;
+    if (name === 'Cal' || lowerRole === 'designer') return Bug;
+    if (name === 'Sian' || lowerRole === 'announcer') return Bird;
+    return User;
 };
 
 export function AgentSeatCard({ agent, runtimeState, onSpeak, meetingLive }: AgentSeatCardProps) {
     const uiState: AgentUiState = runtimeState?.uiState ?? 'idle';
     const stateColor = STATE_COLORS[uiState];
     const isSpeaking = uiState === 'speaking';
+
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [imageError, setImageError] = useState(false);
 
     // Auto-generate avatar image URL
     const imageUrl = getAvatarImageUrl(agent.role, agent.name);
@@ -83,37 +90,79 @@ export function AgentSeatCard({ agent, runtimeState, onSpeak, meetingLive }: Age
                 alignItems: 'center',
                 justifyContent: 'center',
             }}>
-                <Image
-                    src={imageUrl}
-                    alt={agent.name}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    unoptimized // required for external pollinations.ai URLs without configuring next.config.js
-                    onError={(e) => {
-                        // If generation service is down (e.g. 530 Cloudflare error), hide the image tag 
-                        // so the colored background + initials show instead.
-                        e.currentTarget.style.display = 'none';
-                    }}
-                />
-
-                {/* Fallback Text if Image Fails to Load */}
+                {!imageError && (
+                    <div className={uiState === 'speaking' ? 'animate-avatar-speaking' : 'animate-avatar-idle'} style={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%'
+                    }}>
+                        <Image
+                            src={imageUrl}
+                            alt={agent.name}
+                            fill
+                            style={{
+                                objectFit: 'cover',
+                                zIndex: 2,
+                                opacity: imageLoaded ? 1 : 0,
+                                transition: 'opacity 0.5s ease-in-out'
+                            }}
+                            unoptimized
+                            onLoad={() => setImageLoaded(true)}
+                            onError={() => setImageError(true)}
+                        />
+                    </div>
+                )}
+                {/* Fallback UI if Image Fails to Load or is Loading */}
                 <div style={{
-                    fontSize: '64px',
-                    fontWeight: 800,
-                    color: 'white',
-                    opacity: 0.5,
-                    textShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px',
+                    zIndex: 1,
+                    position: 'relative'
                 }}>
-                    {agent.name.charAt(0).toUpperCase()}
+                    <div style={{
+                        width: '80px',
+                        height: '80px',
+                        borderRadius: '50%',
+                        background: 'rgba(255,255,255,0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        opacity: imageLoaded ? 0 : 0.9,
+                        transition: 'opacity 0.3s',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        backdropFilter: 'blur(10px)'
+                    }}>
+                        {(() => {
+                            const RoleIcon = getRoleIcon(agent.role, agent.name);
+                            return <RoleIcon size={40} strokeWidth={1.5} />;
+                        })()}
+                    </div>
+                    <div style={{
+                        fontSize: '24px',
+                        fontWeight: 700,
+                        color: 'white',
+                        opacity: imageLoaded ? 0 : 0.8,
+                        textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                        transition: 'opacity 0.3s'
+                    }}>
+                        {agent.name}
+                    </div>
                 </div>
             </div>
 
-            {/* Gradient Overlay for Text Readability */}
+            {/* Solid Dark Overlay for Text Readability instead of Gradient */}
             <div style={{
                 position: 'absolute',
                 bottom: 0, left: 0, right: 0,
-                height: '50%',
-                background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
+                height: '40%',
+                background: 'rgba(0, 0, 0, 0.65)',
+                backdropFilter: 'blur(2px)',
+                WebkitBackdropFilter: 'blur(2px)',
                 pointerEvents: 'none',
             }} />
 

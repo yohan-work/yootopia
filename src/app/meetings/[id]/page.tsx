@@ -86,6 +86,22 @@ export default function MeetingRoomPage({ params }: MeetingRoomPageProps) {
         if (json.data) {
             setTranscripts((prev) => [...prev, json.data.message]);
             setRuntimeStates(json.data.runtimeStates);
+
+            // TTS (Text-to-Speech)
+            if ('speechSynthesis' in window) {
+                const utteranceText = json.data.message.text.replace(/^\[.*?\]\s*/, ''); // Remove "[Name]" prefix if present
+                const utterance = new SpeechSynthesisUtterance(utteranceText);
+                utterance.lang = 'ko-KR';
+
+                // Try to find a Korean voice
+                const voices = window.speechSynthesis.getVoices();
+                const koVoice = voices.find(v => v.lang.startsWith('ko'));
+                if (koVoice) {
+                    utterance.voice = koVoice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+            }
         }
     };
 

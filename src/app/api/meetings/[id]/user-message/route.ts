@@ -65,7 +65,7 @@ export async function POST(req: NextRequest, { params }: Params) {
             lastSpokenAt: new Date().toISOString(),
         });
 
-        const responseText = generateAgentResponse(agent, text);
+        const responseText = await generateAgentResponse(agent, text);
         const agentMsg = transcriptRepo.add({
             meetingId: id,
             speakerType: 'agent',
