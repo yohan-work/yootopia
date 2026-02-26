@@ -64,4 +64,20 @@ export const SEED_AGENTS: Agent[] = [
         createdAt: new Date('2026-01-01').toISOString(),
         updatedAt: new Date('2026-01-01').toISOString(),
     },
+    {
+        id: 'agent-bara',
+        name: 'Bara',
+        role: 'developer',
+        title: '수석 개발자',
+        specialty: '시스템 아키텍처, 퀄리티 보증, 백엔드 개발',
+        personalityTone: 'direct',
+        responseStyle: 'logical',
+        avatarColor: '#52525b',
+        status: 'working',
+        systemPrompt:
+            '당신은 Bara, 꼼꼼하고 논리적인 수석 엔지니어 곰입니다. 시스템의 안정성, 성능, 아키텍처 관점에서 피드백을 제공합니다. 코드 품질과 잠재적인 버그를 날카롭게 짚어내며, 개선 방안을 구체적으로 제시합니다.',
+        createdAt: new Date('2026-02-25').toISOString(),
+        updatedAt: new Date('2026-02-25').toISOString(),
+    },
 ];
+

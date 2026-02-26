@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Agent, AgentRuntimeState, AgentUiState } from '@/types';
 import { AGENT_UI_STATE_LABELS, AGENT_ROLE_LABELS } from '@/constants/ui-text';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Hand, Lightbulb, Cat, Bird, Bug, User, PawPrint } from 'lucide-react';
+import { Mic, MicOff, Hand, Lightbulb, Cat, Bird, Bug, User, PawPrint, Terminal } from 'lucide-react';
 import Image from 'next/image';
 import { LucideIcon } from 'lucide-react';
 
@@ -35,6 +35,8 @@ const getAvatarImageUrl = (role: string, name: string) => {
         return 'https://image.pollinations.ai/prompt/a%20vibrant%20green%20chameleon%20designer,%20Zootopia%20Pixar%203D%20style,%20high%20quality?width=600&height=400&nologo=true';
     } else if (name === 'Sian' || lowerRole === 'announcer') {
         return 'https://image.pollinations.ai/prompt/a%20professional%20orange%20fox%20news%20anchor,%20Zootopia%20Pixar%203D%20style,%20high%20quality?width=600&height=400&nologo=true';
+    } else if (name === 'Bara' || lowerRole === 'developer') {
+        return '/avatars/bear.png';
     }
 
     const basePrompt = "Zootopia Pixar 3D animation style, anthropomorphic character, professional video call frame, high quality";
@@ -51,6 +53,7 @@ const getRoleIcon = (role: string, name: string): LucideIcon => {
     if (name === 'Done' || lowerRole === 'accountant') return PawPrint;
     if (name === 'Cal' || lowerRole === 'designer') return Bug;
     if (name === 'Sian' || lowerRole === 'announcer') return Bird;
+    if (name === 'Bara' || lowerRole === 'developer') return Terminal;
     return User;
 };
 
