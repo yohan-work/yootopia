@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useSpeech } from '@/hooks/useSpeech';
 import { Meeting, Agent, TranscriptMessage, AgentRuntimeState } from '@/types';
 import { AgentSeatCard } from '@/components/meeting-room/AgentSeatCard';
 import { TranscriptPanel } from '@/components/meeting-room/TranscriptPanel';
@@ -24,6 +25,26 @@ export default function MeetingRoomPage({ params }: MeetingRoomPageProps) {
     const [transcripts, setTranscripts] = useState<TranscriptMessage[]>([]);
     const [runtimeStates, setRuntimeStates] = useState<AgentRuntimeState[]>([]);
     const [loading, setLoading] = useState(true);
+    const [voiceEnabled, setVoiceEnabled] = useState(true);
+
+    const { speak, stop } = useSpeech();
+
+    useEffect(() => {
+        const stored = localStorage.getItem('yootopia-voice-enabled');
+        if (stored !== null) {
+            setVoiceEnabled(stored === 'true');
+        }
+
+        const handleVoiceToggle = (e: any) => {
+            setVoiceEnabled(e.detail);
+            if (!e.detail) {
+                stop();
+            }
+        };
+
+        window.addEventListener('yootopia-voice-toggle', handleVoiceToggle);
+        return () => window.removeEventListener('yootopia-voice-toggle', handleVoiceToggle);
+    }, [stop]);
 
     const fetchAll = async () => {
         const [mRes, aRes, tRes, rRes] = await Promise.all([
@@ -71,12 +92,42 @@ export default function MeetingRoomPage({ params }: MeetingRoomPageProps) {
         });
         const json = await res.json();
         if (json.data) {
-            setTranscripts((prev) => [...prev, ...json.data.messages]);
-            setRuntimeStates(json.data.runtimeStates);
+            const { messages, runtimeStates: initialRuntimeStates } = json.data;
+
+            // Add messages to transcript
+            setTranscripts((prev) => [...prev, ...messages]);
+            setRuntimeStates(initialRuntimeStates);
+
+            // Filter agent messages and speak them sequentially
+            const agentMessages = messages.filter((m: TranscriptMessage) => m.speakerType === 'agent');
+
+            for (const msg of agentMessages) {
+                const agent = agents.find(a => a.id === msg.speakerId);
+                if (agent && voiceEnabled) {
+                    await new Promise<void>((resolve) => {
+                        const utteranceText = msg.text.replace(/^\[.*?\]\s*/, '');
+                        speak(utteranceText, {
+                            agentId: agent.id,
+                            personalityTone: agent.personalityTone,
+                            onStart: () => {
+                                setRuntimeStates(prev => prev.map(rs =>
+                                    rs.agentId === agent.id ? { ...rs, uiState: 'speaking' } : rs
+                                ));
+                            },
+                            onEnd: () => {
+                                setRuntimeStates(prev => prev.map(rs =>
+                                    rs.agentId === agent.id ? { ...rs, uiState: 'idle' } : rs
+                                ));
+                                resolve();
+                            }
+                        });
+                    });
+                }
+            }
         }
     };
 
-    const handleAgentSpeak = async (agentId: string) => {
+    const handleAgentSpeak = useCallback(async (agentId: string) => {
         const res = await fetch(`/api/meetings/${id}/agent-speak`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -85,25 +136,28 @@ export default function MeetingRoomPage({ params }: MeetingRoomPageProps) {
         const json = await res.json();
         if (json.data) {
             setTranscripts((prev) => [...prev, json.data.message]);
-            setRuntimeStates(json.data.runtimeStates);
 
-            // TTS (Text-to-Speech)
-            if ('speechSynthesis' in window) {
-                const utteranceText = json.data.message.text.replace(/^\[.*?\]\s*/, ''); // Remove "[Name]" prefix if present
-                const utterance = new SpeechSynthesisUtterance(utteranceText);
-                utterance.lang = 'ko-KR';
-
-                // Try to find a Korean voice
-                const voices = window.speechSynthesis.getVoices();
-                const koVoice = voices.find(v => v.lang.startsWith('ko'));
-                if (koVoice) {
-                    utterance.voice = koVoice;
-                }
-
-                window.speechSynthesis.speak(utterance);
+            // Sync voice and animation
+            const agent = agents.find(a => a.id === agentId);
+            if (agent && voiceEnabled) {
+                const utteranceText = json.data.message.text.replace(/^\[.*?\]\s*/, '');
+                speak(utteranceText, {
+                    agentId,
+                    personalityTone: agent.personalityTone,
+                    onStart: () => {
+                        setRuntimeStates(prev => prev.map(rs =>
+                            rs.agentId === agentId ? { ...rs, uiState: 'speaking' } : rs
+                        ));
+                    },
+                    onEnd: () => {
+                        setRuntimeStates(prev => prev.map(rs =>
+                            rs.agentId === agentId ? { ...rs, uiState: 'idle' } : rs
+                        ));
+                    }
+                });
             }
         }
-    };
+    }, [id, agents, speak]);
 
     if (loading) {
         return (

@@ -8,7 +8,10 @@ import {
     MessageSquare,
     CalendarDays,
     Settings,
+    Volume2,
+    VolumeX
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { SIDEBAR_LABELS } from '@/constants/ui-text';
 
 
@@ -50,6 +53,22 @@ const SIDEBAR_SECTIONS: SidebarSection[] = [
 
 export function AppSidebar() {
     const pathname = usePathname();
+    const [voiceEnabled, setVoiceEnabled] = useState(true);
+
+    useEffect(() => {
+        const stored = localStorage.getItem('yootopia-voice-enabled');
+        if (stored !== null) {
+            setVoiceEnabled(stored === 'true');
+        }
+    }, []);
+
+    const toggleVoice = () => {
+        const newValue = !voiceEnabled;
+        setVoiceEnabled(newValue);
+        localStorage.setItem('yootopia-voice-enabled', String(newValue));
+        // Dispatch custom event for MeetingRoomPage to pick up
+        window.dispatchEvent(new CustomEvent('yootopia-voice-toggle', { detail: newValue }));
+    };
 
     const isActive = (href: string, disabled?: boolean) => {
         if (disabled) return false;
@@ -101,8 +120,31 @@ export function AppSidebar() {
             </nav>
 
             {/* Footer */}
-            <div className="sidebar-footer">
-                <div className="sidebar-item" style={{ opacity: 0.5, cursor: 'default', fontSize: '11px' }}>
+            <div className="sidebar-footer" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <button
+                    onClick={toggleVoice}
+                    className="sidebar-item"
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        color: voiceEnabled ? 'var(--status-speaking)' : 'var(--text-muted)',
+                        cursor: 'pointer',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    {voiceEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                    <span style={{ fontSize: '13px', fontWeight: 500 }}>
+                        {voiceEnabled ? '음성 켜짐' : '음성 꺼짐'}
+                    </span>
+                </button>
+
+                <div className="sidebar-item" style={{ opacity: 0.5, cursor: 'default', fontSize: '11px', padding: '4px 12px' }}>
                     <span>⚡</span>
                     <span>Zooffice v0.1</span>
                 </div>
