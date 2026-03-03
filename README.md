@@ -13,6 +13,7 @@
 | UI Components | shadcn/ui, Lucide Icons |
 | 3D 렌더링 | React Three Fiber, @react-three/drei, Three.js |
 | 애니메이션 | Framer Motion |
+| Voice (TTS) | Web Speech API |
 | 상태 관리 | Zustand (예정) |
 
 ---
@@ -65,7 +66,10 @@
 #### 회의 진행 기능
 - 회의 시작 / 종료 버튼
 - 채팅 입력창 (Enter 전송, Shift+Enter 줄바꿈)
-- 에이전트 자동 응답 (키워드 기반 오케스트레이션 엔진)
+- 에이전트 자동 응답 (Ollama 기반 하이브리드 오케스트레이션 엔진)
+- **에이전트 보이스 (TTS)** — Web Speech API로 한국어 육성 출력 (성격별 톤 설정)
+- **발언 애니메이션 동기화** — 음성 재생 시에만 아바타 말하기 애니메이이션 + 오디오 파동 표시
+- **음성 토글 제어** — 사이드바에서 전체 음성 ON/OFF (LocalStorage 저장)
 - **지목 발언** — 특정 에이전트 카드의 "지목" 버튼으로 발언 유도
 - 대화 트랜스크립트 패널 (사용자/에이전트/시스템 버블, 자동 스크롤)
 - API: `POST /api/meetings/[id]/start`, `end`, `user-message`, `agent-speak`, `runtime-states`
